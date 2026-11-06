@@ -1,5 +1,7 @@
 
 const pool = require('../utils/db.cjs');
+const { generarToken } = require('../utils/jwt.js');
+const bcrypt = require('bcrypt');
 
 async function login(req, res) {
   const usuario = req.body.usuario;
@@ -8,15 +10,21 @@ async function login(req, res) {
 
   try {
     // Using placeholders
-    const results = await pool.query('SELECT * FROM usuarios WHERE usuario = ? AND clave = ?', [usuario, clave]);
+    const results = await pool.query('SELECT * FROM usuarios WHERE usuario = ? ', [usuario]);
 
     console.log(results);
 
 
     if (results[0].length > 0) {
-      res.send('Login exitoso');
+      const isMatch = await bcrypt.compare(clave, results[0][0].clave);
+      if (!isMatch) {
+        res.status(401).json({ message: 'Usuario o clave incorrectos' });
+        return;
+      }
+      const token = generarToken(usuario);
+      res.json({ message: 'Inicio de sesión exitoso', token });
     } else {
-      res.send('Usuario o clave incorrectos');
+      res.status(401).json({ message: 'Usuario o clave incorrectos' });
     }
 
   } catch (error) {

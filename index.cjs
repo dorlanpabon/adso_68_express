@@ -3,6 +3,13 @@ const app = express();
 const port = 3000;
 const login = require('./routes/login.cjs');
 const register = require('./routes/register.cjs');
+const productos = require('./routes/productos.cjs');
+const cors = require('cors');
+const env = require('dotenv');
+
+env.config();
+
+app.use(cors());
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
@@ -11,6 +18,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/api/login', login);
 
 app.post('/api/register', register);
+
+//productos
+app.get('/api/productos', productos);
 
 //cambio
 
