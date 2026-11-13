@@ -1,0 +1,17 @@
+-- 001: roles y vinculación de usuarios con roles (no destructiva)
+CREATE TABLE roles (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(20) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Usuarios existentes quedan sin rol (NULL) hasta que se ejecute el seed.
+ALTER TABLE usuarios
+  ADD COLUMN role_id INT UNSIGNED NULL,
+  ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1,
+  ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  ADD CONSTRAINT fk_usuarios_role FOREIGN KEY (role_id) REFERENCES roles (id),
+  ADD INDEX idx_usuarios_role (role_id);

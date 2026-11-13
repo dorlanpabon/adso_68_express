@@ -1,11 +1,9 @@
 const pool = require('../utils/db.cjs');
-const { verificarToken } = require('../utils/jwt.js');
 
+// Fase 2: la autenticación la hace el middleware `authenticate` en index.cjs.
+// Este handler asume req.user ya validado.
 async function productos(req, res) {
-  const token = req.headers['authorization'];
-
   try {
-    verificarToken(token);
     const results = await pool.query('SELECT * FROM productos');
     res.json(results[0]);
   } catch (error) {

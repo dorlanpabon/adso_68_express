@@ -6,14 +6,10 @@ const bcrypt = require('bcrypt');
 async function login(req, res) {
   const usuario = req.body.usuario;
   const clave = req.body.clave;
-  console.log(usuario, clave);
 
   try {
     // Using placeholders
     const results = await pool.query('SELECT * FROM usuarios WHERE usuario = ? ', [usuario]);
-
-    console.log(results);
-
 
     if (results[0].length > 0) {
       const isMatch = await bcrypt.compare(clave, results[0][0].clave);

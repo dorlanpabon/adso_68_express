@@ -1,0 +1,42 @@
+-- 006: clientes, pedidos y líneas de pedido
+-- El total del pedido SIEMPRE se calcula en servidor con DECIMAL.
+
+CREATE TABLE customers (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NULL,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  phone VARCHAR(30) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_customers_user FOREIGN KEY (user_id) REFERENCES usuarios (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE orders (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_number VARCHAR(30) NOT NULL UNIQUE,
+  customer_id INT UNSIGNED NOT NULL,
+  status ENUM('PENDING_PAYMENT','CONFIRMED','PAID','SHIPPED','DELIVERED','CANCELLED')
+    NOT NULL DEFAULT 'PENDING_PAYMENT',
+  payment_status ENUM('PENDING','PAID','FAILED','REFUNDED') NOT NULL DEFAULT 'PENDING',
+  subtotal DECIMAL(12,2) NOT NULL DEFAULT 0,
+  total DECIMAL(12,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+  INDEX idx_orders_status (status),
+  INDEX idx_orders_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE order_items (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id BIGINT UNSIGNED NOT NULL,
+  product_id INT UNSIGNED NOT NULL,
+  sku_snapshot VARCHAR(60) NOT NULL,
+  name_snapshot VARCHAR(150) NOT NULL,
+  unit_price DECIMAL(12,2) NOT NULL,
+  quantity DECIMAL(12,3) NOT NULL,
+  line_total DECIMAL(12,2) NOT NULL,
+  CONSTRAINT fk_items_order FOREIGN KEY (order_id) REFERENCES orders (id),
+  CONSTRAINT fk_items_product FOREIGN KEY (product_id) REFERENCES products (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
