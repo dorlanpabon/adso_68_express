@@ -1,5 +1,7 @@
 -- 001: roles y vinculación de usuarios con roles (no destructiva)
-CREATE TABLE roles (
+-- IF NOT EXISTS: si una ejecución anterior creó `roles` pero falló en el
+-- ALTER de abajo (BD sin `usuarios`), al reintentar no debe chocar.
+CREATE TABLE IF NOT EXISTS roles (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   code VARCHAR(20) NOT NULL UNIQUE,
   name VARCHAR(100) NOT NULL,
