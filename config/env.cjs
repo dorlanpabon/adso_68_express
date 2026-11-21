@@ -16,7 +16,12 @@ const env = {
     name: process.env.DB_NAME || 'adso_68_express',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    ssl: process.env.DB_SSL || false,
+    // mysql2 NO acepta `ssl: true` (boolean): exige un OBJETO.
+    // TiDB Cloud Serverless usa certificados Let's Encrypt, así que con
+    // rejectUnauthorized=true basta la CA integrada de Node (no hace falta CA_FILE).
+    ssl: ['true', '1', 'yes'].includes(String(process.env.DB_SSL || '').trim().toLowerCase())
+      ? { minVersion: 'TLSv1.2', rejectUnauthorized: true }
+      : false,
   },
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',

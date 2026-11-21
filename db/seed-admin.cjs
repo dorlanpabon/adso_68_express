@@ -1,7 +1,9 @@
 // Seed controlado de la cuenta ADMIN inicial.
 // Uso (la credencial NUNCA queda en código ni en el repo):
 //   node db/seed-admin.cjs --usuario <nombre> --clave <contraseña>
-// No ejecutar en producción con claves de desarrollo.
+//   SEED_ADMIN_USUARIO=... SEED_ADMIN_CLAVE=... node db/seed-admin.cjs
+// En el arranque de Render es OPCIONAL: si no hay credenciales, no hace nada y
+// termina con éxito; si el usuario ya existe, tampoco falla (arranque idempotente).
 
 const bcrypt = require('bcrypt');
 const pool = require('../utils/db.cjs');
@@ -12,11 +14,18 @@ function arg(name) {
 }
 
 async function main() {
-  const usuario = arg('usuario');
-  const clave = arg('clave');
+  const usuario = arg('usuario') || process.env.SEED_ADMIN_USUARIO;
+  const clave = arg('clave') || process.env.SEED_ADMIN_CLAVE;
 
+  // Sin credenciales = seed opcional omitido (no bloquea el arranque).
+  if (!usuario && !clave) {
+    console.log('= seed-admin omitido (sin SEED_ADMIN_USUARIO/SEED_ADMIN_CLAVE)');
+    await pool.end();
+    return;
+  }
   if (!usuario || !clave) {
     console.error('Falta --usuario y/o --clave. Ejemplo: node db/seed-admin.cjs --usuario admin --clave "********"');
+    await pool.end();
     process.exit(1);
   }
   if (clave.length < 12) {
@@ -32,8 +41,9 @@ async function main() {
 
   const [existente] = await pool.query('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1', [usuario]);
   if (existente[0]) {
-    console.error(`El usuario "${usuario}" ya existe (id ${existente[0].id}). No se modifica nada.`);
-    process.exit(1);
+    console.log(`= ADMIN "${usuario}" ya existe (id ${existente[0].id}). No se modifica nada.`);
+    await pool.end();
+    return;
   }
 
   const hash = await bcrypt.hash(clave, 10);

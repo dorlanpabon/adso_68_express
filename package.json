@@ -8,6 +8,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --watch index.cjs",
+    "start": "node db/migrate.cjs && node db/migrate.cjs --seed && node db/seed-admin.cjs && node index.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
