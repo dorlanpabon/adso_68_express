@@ -16,6 +16,7 @@ const env = {
     name: process.env.DB_NAME || 'adso_68_express',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
+    ssl: process.env.DB_SSL || false,
   },
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
